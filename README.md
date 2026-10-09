@@ -18,12 +18,14 @@ Sukebei.
 - **Settings**: Nyaa on or off, Sukebei on or off (off at first), trusted
   uploaders only.
 
-Until droidtop can open a link in another app (it cannot yet), the button shows
-the magnet link for you to copy into your torrent app.
+The magnet link opens through Android's chooser. When that is not possible
+(an older droidtop, the permission turned off, or no torrent app installed) the
+button shows the link to copy and says why.
 
 ## Permissions
 
 - Connect to nyaa.si and sukebei.nyaa.si.
+- Open links in other apps (the magnet link, to your torrent app).
 
 It runs contained in droidtop (no network or files of its own) and makes one
 request per search per site, at most one request every 2 seconds per site.

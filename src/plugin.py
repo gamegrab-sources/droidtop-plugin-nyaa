@@ -186,12 +186,7 @@ def _handoff(args, report):
     if not uri.startswith("magnet:?xt=urn:btih:"):
         return gg.failed("Missing magnet link")
     title = str(args.get("title") or "Torrent")
-    if gg.hand_off(uri, title):
-        return gg.done("Opened in your torrent app")
-    return gg.done(
-        "Copy the magnet link into your torrent app",
-        view=gg.handoff_fallback(title, uri, "This version of droidtop cannot open links in other apps yet. " + gg.TORRENT_NOTE),
-    )
+    return gg.handoff_result(uri, title, "Opened in your torrent app", gg.TORRENT_NOTE + " Install one to open magnet links.")
 
 
 # ------------------------------------------------------------------ settings (C)

@@ -66,12 +66,14 @@ class Nyaa(unittest.TestCase):
 
     def test_handoff_falls_back_to_the_link(self):
         uri = gg.magnet("3888fbc0f39f807569ae7aa8d21d16a8b4fec56f", "x")
+        self.assertEqual(job("library.sources", "handoff", {"uri": uri, "title": "x"})["values"]["message"], "Opened in your torrent app")
+        self.assertEqual(self.host.calls[-1], ("apps", "view", {"uri": uri, "title": "x"}))
+        self.host.handoff = "none"
         result = job("library.sources", "handoff", {"uri": uri, "title": "x"})
         self.assertTrue(result["ok"])
         page = json.loads(result["values"]["view"])
+        self.assertIn("no app opens magnet links", page["sections"][0]["items"][0]["subtitle"])
         self.assertEqual(page["sections"][0]["items"][1]["value"], uri)
-        self.host.handoff = True
-        self.assertEqual(job("library.sources", "handoff", {"uri": uri})["values"]["message"], "Opened in your torrent app")
 
     def test_empty_query_asks_nothing(self):
         self.assertEqual(call("library.sources", "search", {"values": {"query": " "}})["data"]["results"], [])
