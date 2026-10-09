@@ -1,0 +1,9 @@
+droidtop-plugin-nyaa
+Copyright (C) 2026 the droidtop-plugin-nyaa contributors
+Licensed under the GNU General Public License version 3 (see LICENSE).
+
+It embeds gamegrab (https://github.com/gamegrab-sources/plugin-common-py),
+GPL-3.0, whose XenForo helpers are ported from droidtop-plugin-f95.
+
+This is an unofficial plugin. It is not part of droidtop and is not
+affiliated with or endorsed by Nyaa, Sukebei or droidtop.

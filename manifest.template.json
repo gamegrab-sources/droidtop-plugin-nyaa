@@ -1,0 +1,35 @@
+{
+  "id": "gamegrab.nyaa",
+  "origin": "gamegrab",
+  "label": "Nyaa",
+  "description": "Unofficial plugin from gamegrab-sources, not part of droidtop and not affiliated with Nyaa or Sukebei. Searches the games categories of Nyaa (and Sukebei, if you turn it on) and hands a torrent you pick to a torrent app you have installed; droidtop has no torrent client.",
+  "version": "0.1.0",
+  "kind": "python",
+  "contractVersion": 2,
+  "requestsRoot": false,
+  "abis": [],
+  "provides": [
+    {
+      "point": "library.sources",
+      "version": 1,
+      "id": "nyaa",
+      "label": "Nyaa"
+    },
+    {
+      "point": "ui.settings",
+      "version": 1,
+      "id": "main",
+      "target": "plugin"
+    }
+  ],
+  "permissions": [
+    {
+      "id": "net.domains",
+      "domains": [
+        "nyaa.si",
+        "sukebei.nyaa.si"
+      ],
+      "reason": "Searches the sites' public RSS feeds"
+    }
+  ]
+}
