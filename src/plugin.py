@@ -93,7 +93,7 @@ def search_sites(query, sites, trusted_only):
         def produce(url=url, site=site):
             answer = gg.http(url)
             if not answer.ok:
-                raise gg.HostError("FAILED", "%s answered HTTP %d" % (SITES[site]["label"], answer.status))
+                raise gg.HostError("FAILED", gg.http_error(SITES[site]["label"], answer.status))
             return parse_feed(site, answer.body)
 
         try:
@@ -128,14 +128,14 @@ def result_row(r):
 def _form(args):
     s = settings()
     enabled = [k for k in SITES if s[k]]
-    options = [("all", "All enabled sites")] + [(k, SITES[k]["label"]) for k in SITES]
+    options = [("all", "All sites")] + [(k, SITES[k]["label"]) for k in SITES]
     return gg.ok(
         gg.view(
             "Search Nyaa",
             [
                 gg.text("query", "Search", ""),
                 gg.choice("site", "Where", options, value="all"),
-                None if enabled else gg.info("none", "No site is on", subtitle="Turn Nyaa or Sukebei on in this plugin's Settings."),
+                None if enabled else gg.info("none", "No site is on", subtitle="Turn one on in Settings."),
             ],
         )
     )
@@ -173,7 +173,7 @@ def _detail(args):
                     "handoff",
                     "Open in a torrent app",
                     gg.job("handoff", "Open in a torrent app", {"uri": uri, "title": r.get("title") or ""}),
-                    subtitle=gg.TORRENT_NOTE + " The game lands where that app saves it; add that folder to droidtop's game folders to see it in your library.",
+                    subtitle="Add that app's download folder to your game folders to see the game here.",
                 ),
             ],
         )
@@ -186,7 +186,7 @@ def _handoff(args, report):
     if not uri.startswith("magnet:?xt=urn:btih:"):
         return gg.failed("Missing magnet link")
     title = str(args.get("title") or "Torrent")
-    return gg.handoff_result(uri, title, "Opened in your torrent app", gg.TORRENT_NOTE + " Install one to open magnet links.")
+    return gg.handoff_result(uri, title, "Opened in your torrent app", "Install a torrent app to open magnet links.")
 
 
 # ------------------------------------------------------------------ settings (C)
@@ -198,10 +198,9 @@ def settings_view():
     return gg.view(
         "Nyaa",
         [
-            gg.toggle("nyaa", "Search Nyaa", s["nyaa"], save, subtitle="nyaa.si, Software - Games"),
-            gg.toggle("sukebei", "Search Sukebei", s["sukebei"], save, subtitle="sukebei.nyaa.si, Art - Games (adult)"),
+            gg.toggle("nyaa", "Nyaa", s["nyaa"], save, subtitle="Games"),
+            gg.toggle("sukebei", "Sukebei", s["sukebei"], save, subtitle="Adult games"),
             gg.toggle("trustedOnly", "Trusted uploaders only", s["trustedOnly"], save),
-            gg.info("torrents", "Torrents", subtitle=gg.TORRENT_NOTE),
         ],
     )
 

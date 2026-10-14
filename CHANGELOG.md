@@ -3,6 +3,15 @@
 Every working build of `main` is a release (`v<version>-<CI run>`); the
 declared version moves with every change to the plugin's sources.
 
+## 0.3.0
+
+- Shorter text: a one-line description (the catalog already marks the plugin
+  Unofficial), short settings, no repeated torrent note.
+- Failures in plain words ("Nyaa is not answering right now") instead of
+  "answered HTTP 503".
+- Shared module 0.3.0: droidtop's contract 2.1 host names (needs droidtop
+  0.2.0-dev.1767 or newer) and smaller data reads.
+
 ## 0.2.0
 
 - Open in a torrent app now opens the magnet link through Android's chooser

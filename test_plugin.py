@@ -54,20 +54,20 @@ class Nyaa(unittest.TestCase):
         call("library.sources", "search", {"query": "y"})
         self.assertTrue(any(u.startswith("https://sukebei.nyaa.si/?page=rss&q=y&c=1_3") for u in self.host.requests()))
 
-    def test_detail_offers_the_magnet_and_says_droidtop_has_no_client(self):
+    def test_detail_offers_the_magnet_for_a_torrent_app(self):
         ref = call("library.sources", "search", {"query": "sample game"})["data"]["results"][1]["ref"]
         before = len(self.host.requests())
         page = call("library.sources", "detail", {"ref": ref})["data"]
         self.assertEqual(len(self.host.requests()), before)
         button = [n for n in page["sections"][0]["items"] if n["type"] == "button"][0]
-        self.assertIn("no torrent client", button["subtitle"])
+        self.assertEqual(button["title"], "Open in a torrent app")
         uri = button["action"]["args"]["uri"]
         self.assertTrue(uri.startswith("magnet:?xt=urn:btih:3888fbc0f39f807569ae7aa8d21d16a8b4fec56f&dn=Sample+Game"))
 
     def test_handoff_falls_back_to_the_link(self):
         uri = gg.magnet("3888fbc0f39f807569ae7aa8d21d16a8b4fec56f", "x")
         self.assertEqual(job("library.sources", "handoff", {"uri": uri, "title": "x"})["values"]["message"], "Opened in your torrent app")
-        self.assertEqual(self.host.calls[-1], ("apps", "view", {"uri": uri, "title": "x"}))
+        self.assertEqual(self.host.calls[-1], ("link", "open", {"uri": uri, "title": "x"}))
         self.host.handoff = "none"
         result = job("library.sources", "handoff", {"uri": uri, "title": "x"})
         self.assertTrue(result["ok"])
