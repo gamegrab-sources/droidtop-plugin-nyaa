@@ -3,6 +3,12 @@
 Every working build of `main` is a release (`v<version>-<CI run>`); the
 declared version moves with every change to the plugin's sources.
 
+## 0.3.1
+
+- Declares that it serves every system (`"*"`): its torrents cover consoles and PC.
+  Needs a droidtop that reads `systems` on `library.sources` (docs/plugin-api.md 1.6); an older
+  droidtop ignores the field and lists the source everywhere, as before.
+
 ## 0.3.0
 
 - Shorter text: a one-line description (the catalog already marks the plugin

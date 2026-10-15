@@ -3,7 +3,7 @@
   "origin": "gamegrab",
   "label": "Nyaa",
   "description": "Searches Nyaa and Sukebei for games and opens a torrent in your torrent app.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "kind": "python",
   "contractVersion": 2,
   "requestsRoot": false,
@@ -13,7 +13,8 @@
       "point": "library.sources",
       "version": 1,
       "id": "nyaa",
-      "label": "Nyaa"
+      "label": "Nyaa",
+      "systems": "*"
     },
     {
       "point": "ui.settings",
