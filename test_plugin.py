@@ -50,7 +50,10 @@ class Nyaa(unittest.TestCase):
     def test_sukebei_only_when_turned_on(self):
         call("library.sources", "search", {"query": "x"})
         self.assertTrue(all("sukebei" not in u for u in self.host.requests()))
-        call("ui.settings", "save", {"values": {"sukebei": "true"}})
+        call("ui.facets", "set", {"key": "sukebei", "value": True})
+        switches = call("ui.facets", "get", {"target": "settings.page"})["data"]["facets"]
+        self.assertEqual([(f["id"], f["value"]) for f in switches], [("nyaa", True), ("sukebei", True), ("trustedOnly", False)])
+        self.assertEqual(call("ui.facets", "set", {"key": "nope", "value": True})["error"]["code"], "INVALID_ARGS")
         call("library.sources", "search", {"query": "y"})
         self.assertTrue(any(u.startswith("https://sukebei.nyaa.si/?page=rss&q=y&c=1_3") for u in self.host.requests()))
 
@@ -88,7 +91,7 @@ class Built(unittest.TestCase):
         scope = {"__name__": "built"}
         exec(compile(open(built, encoding="utf-8").read(), "plugin.py", "exec"), scope)
         install(scope["gg"], FakeHost())
-        reply = json.loads(scope["handle"](envelope("ui.settings", "view")))
+        reply = json.loads(scope["handle"](envelope("ui.facets", "get", {"target": "settings.page"})))
         self.assertTrue(reply["ok"])
 
 

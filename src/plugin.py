@@ -192,33 +192,43 @@ def _handoff(args, report):
 # ------------------------------------------------------------------ settings (C)
 
 
-def settings_view():
+SETTINGS_TARGET = "settings.page"
+SWITCHES = [
+    ("nyaa", "Nyaa", "Games"),
+    ("sukebei", "Sukebei", "Adult games"),
+    ("trustedOnly", "Trusted uploaders only", None),
+]
+
+
+def settings_facets():
+    """The settings page (droidtop plugin-api 1.10, ui.facets target settings.page): its three switches."""
     s = settings()
-    save = gg.call_action("save")
-    return gg.view(
-        "Nyaa",
-        [
-            gg.toggle("nyaa", "Nyaa", s["nyaa"], save, subtitle="Games"),
-            gg.toggle("sukebei", "Sukebei", s["sukebei"], save, subtitle="Adult games"),
-            gg.toggle("trustedOnly", "Trusted uploaders only", s["trustedOnly"], save),
-        ],
-    )
+    facets = []
+    for key, label, sub in SWITCHES:
+        facet = {"id": key, "kind": "toggle", "v": 1, "targets": [SETTINGS_TARGET], "label": label, "value": s[key], "call": {"op": "set", "args": {"key": key}}}
+        if sub:
+            facet["sub"] = sub
+        facets.append(facet)
+    return {"facets": facets}
 
 
-@plugin.on("ui.settings", "view")
-def _settings(args):
-    return gg.ok(settings_view())
+@plugin.on("ui.facets", "get")
+def _facets(args):
+    if args.get("target") != SETTINGS_TARGET:
+        return gg.ok({"facets": []})
+    return gg.ok(settings_facets())
 
 
-@plugin.on("ui.settings", "save")
-def _save(args):
-    values = args.get("values") or {}
+@plugin.on("ui.facets", "set")
+def _set(args):
+    """One switch: droidtop sends its new value as `value`."""
+    key = args.get("key")
+    if key not in DEFAULTS:
+        return gg.error("INVALID_ARGS", "Unknown setting")
     s = settings()
-    for key in DEFAULTS:
-        if key in values:
-            s[key] = str(values[key]).lower() == "true"
+    s[key] = args.get("value") is True or str(args.get("value")).lower() == "true"
     gg.write_json(SETTINGS, s)
-    return gg.ok({"view": settings_view()})
+    return gg.ok(settings_facets())
 
 
 handle, start_job, cancel_job = plugin.entry_points()
