@@ -3,6 +3,13 @@
 Every working build of `main` is a release (`v<version>-<CI run>`); the
 declared version moves with every change to the plugin's sources.
 
+## 0.5.0
+
+- `featured` (droidtop docs/plugin-api.md 1.8, Droidtop/tracker#612): the turned-on sites' newest games, their RSS
+  feed with no query, newest first, at most the `limit` droidtop asks for (up to 60), for droidtop's Get new games
+  page. Only for that page as a whole and for PC: a torrent's title does not reliably say which system it is for, so
+  a console's page gets none.
+
 ## 0.4.1
 
 - The release of 0.4.0's facets and contract 3 changes. 0.4.0's two commits shared one declared version, so CI's version rule refused the second

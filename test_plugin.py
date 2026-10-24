@@ -47,6 +47,17 @@ class Nyaa(unittest.TestCase):
         call("library.sources", "search", {"query": "sample game"})
         self.assertEqual(len(self.host.requests()), 1)
 
+    def test_featured_lists_the_newest_first_and_nothing_for_a_console(self):
+        self.host.pages[plugin.feed_url("nyaa", "", False)] = FEED
+        reply = call("library.sources", "featured", {"limit": 5})
+        rows = reply["data"]["results"]
+        # The one with an upload date is newest; one without a readable date comes after it.
+        self.assertEqual([r["title"] for r in rows], ["Sample Game v1.2 [Group]", "Sample Game v1.1"])
+        self.assertEqual(len(call("library.sources", "featured", {"limit": 1})["data"]["results"]), 1)
+        before = len(self.host.requests())
+        self.assertEqual(call("library.sources", "featured", {"platform": "snes", "limit": 5})["data"]["results"], [])
+        self.assertEqual(len(self.host.requests()), before)
+
     def test_sukebei_only_when_turned_on(self):
         call("library.sources", "search", {"query": "x"})
         self.assertTrue(all("sukebei" not in u for u in self.host.requests()))

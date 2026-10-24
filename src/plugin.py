@@ -12,6 +12,7 @@ it keeps through droidtop's data API, and it draws nothing itself.
 import json
 import re
 import time
+from email.utils import parsedate_to_datetime
 from urllib.parse import quote_plus
 
 import gamegrab as gg  # embedded by build.sh
@@ -107,6 +108,37 @@ def search_sites(query, sites, trusted_only):
     return results
 
 
+def _uploaded(r):
+    """When a torrent was uploaded, as a number to sort by; 0 when its date cannot be read."""
+    try:
+        return parsedate_to_datetime(r.get("date") or "").timestamp()
+    except (TypeError, ValueError, IndexError, OverflowError):
+        return 0
+
+
+def latest_sites(sites, trusted_only):
+    """The newest torrents of the turned-on sites: their RSS feed with no query, newest first."""
+    results = []
+    failures = []
+    for site in sites:
+        url = feed_url(site, "", trusted_only)
+
+        def produce(url=url, site=site):
+            answer = gg.http(url)
+            if not answer.ok:
+                raise gg.HostError("FAILED", gg.http_error(SITES[site]["label"], answer.status))
+            return parse_feed(site, answer.body)
+
+        try:
+            results.extend(gg.cached("latest-" + url, SEARCH_CACHE_S, produce))
+        except gg.HostError as e:
+            failures.append(e)
+    if failures and len(failures) == len(sites):
+        raise failures[0]
+    results.sort(key=lambda r: -_uploaded(r))
+    return results
+
+
 def result_row(r):
     badges = [SITES[r["site"]]["label"]]
     if r["trusted"]:
@@ -152,6 +184,28 @@ def _search(args):
     sites = [k for k in SITES if (s[k] if which == "all" else k == which)]
     results = search_sites(query, sites, s["trustedOnly"])
     return gg.ok({"results": [result_row(r) for r in results[:100]]})
+
+
+# The platforms `featured` answers for: none named (Get new games' own page) and PC. A torrent's title does not say
+# reliably which system it is for, so a console's page gets nothing rather than PC games.
+FEATURED_PLATFORMS = ("", "pc", "windows")
+
+
+@plugin.on("library.sources", "featured")
+def _featured(args):
+    """What the sites list newest (droidtop docs/plugin-api.md 1.8, Droidtop/tracker#612), for Get new games."""
+    if str(args.get("platform") or "").strip() not in FEATURED_PLATFORMS:
+        return gg.ok({"results": []})
+    try:
+        limit = max(1, min(int(args.get("limit") or 20), 60))
+    except (TypeError, ValueError):
+        limit = 20
+    s = settings()
+    sites = [k for k in SITES if s[k]]
+    if not sites:
+        return gg.ok({"results": []})
+    results = latest_sites(sites, s["trustedOnly"])
+    return gg.ok({"results": [result_row(r) for r in results[:limit]]})
 
 
 @plugin.on("library.sources", "detail")
