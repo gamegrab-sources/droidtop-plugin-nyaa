@@ -3,6 +3,13 @@
 Every working build of `main` is a release (`v<version>-<CI run>`); the
 declared version moves with every change to the plugin's sources.
 
+## 0.6.0
+
+- Search options instead of a search form (droidtop docs/plugin-api.md 1.10, `search.filter`, Droidtop/tracker#602):
+  "Where" is a search option droidtop keeps and sends with each search as `filters.site`. With no site on, a notice
+  says so and opens the site switches as a page of their own, instead of "Turn one on in Settings". The `form` op is
+  gone; a `values.site` from an older droidtop is still read. Needs a droidtop with `search.filter`.
+
 ## 0.5.0
 
 - `featured` (droidtop docs/plugin-api.md 1.8, Droidtop/tracker#612): the turned-on sites' newest games, their RSS

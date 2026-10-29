@@ -9,7 +9,9 @@ Sukebei.
 - **Get games** (droidtop's `library.sources`): searches the games categories of
   Nyaa (Software - Games) and, when you turn it on, Sukebei (Art - Games) through
   their public RSS search feeds. Results show size, seeders and the site; searches
-  are kept for 30 minutes.
+  are kept for 30 minutes. **Where** to search (all sites, Nyaa or Sukebei) is one of
+  droidtop's search options for this source (`search.filter`), kept between searches;
+  with no site on, the options say so and open the site switches in place.
 - **A result** shows its size, seeders, category and upload date, and offers
   **Open in a torrent app**: droidtop has no torrent client, so the torrent's
   magnet link is handed to a torrent app you have installed. The game lands

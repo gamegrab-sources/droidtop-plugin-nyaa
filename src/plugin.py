@@ -156,23 +156,6 @@ def result_row(r):
 # ------------------------------------------------------------------ library.sources (A2)
 
 
-@plugin.on("library.sources", "form")
-def _form(args):
-    s = settings()
-    enabled = [k for k in SITES if s[k]]
-    options = [("all", "All sites")] + [(k, SITES[k]["label"]) for k in SITES]
-    return gg.ok(
-        gg.view(
-            "Search Nyaa",
-            [
-                gg.text("query", "Search", ""),
-                gg.choice("site", "Where", options, value="all"),
-                None if enabled else gg.info("none", "No site is on", subtitle="Turn one on in Settings."),
-            ],
-        )
-    )
-
-
 @plugin.on("library.sources", "search")
 def _search(args):
     values = args.get("values") or {}
@@ -180,7 +163,10 @@ def _search(args):
     if not query:
         return gg.ok({"results": []})
     s = settings()
-    which = values.get("site") or "all"
+    # Where to search is one of this source's search options (search.filter), kept by droidtop and sent as
+    # `filters`; an older droidtop's form sent it in `values`.
+    filters = args.get("filters") or {}
+    which = str(filters.get("site") or values.get("site") or "all")
     sites = [k for k in SITES if (s[k] if which == "all" else k == which)]
     results = search_sites(query, sites, s["trustedOnly"])
     return gg.ok({"results": [result_row(r) for r in results[:100]]})
@@ -247,6 +233,7 @@ def _handoff(args, report):
 
 
 SETTINGS_TARGET = "settings.page"
+FILTER_TARGET = "search.filter"
 SWITCHES = [
     ("nyaa", "Nyaa", "Games"),
     ("sukebei", "Sukebei", "Adult games"),
@@ -266,11 +253,37 @@ def settings_facets():
     return {"facets": facets}
 
 
+def filter_facets():
+    """This source's search options in droidtop's one search (search.filter): where to search. With no site on, a
+    notice says so and opens the site switches in place, rather than sending the person to Settings."""
+    s = settings()
+    options = [{"value": "all", "label": "All sites"}] + [{"value": k, "label": SITES[k]["label"]} for k in SITES]
+    facets = [{"id": "site", "kind": "choice", "v": 1, "targets": [FILTER_TARGET], "label": "Where", "options": options, "value": "all"}]
+    if not any(s[k] for k in SITES):
+        facets.append({
+            "id": "no_site", "kind": "notice", "v": 1, "targets": [FILTER_TARGET], "title": "No site is on",
+            "sub": "Turn Nyaa or Sukebei on to search.", "tone": "caution",
+            "call": {"op": "sites", "kind": "page"},
+        })
+    return {"facets": facets}
+
+
 @plugin.on("ui.facets", "get")
 def _facets(args):
-    if args.get("target") != SETTINGS_TARGET:
-        return gg.ok({"facets": []})
-    return gg.ok(settings_facets())
+    target = args.get("target")
+    if target == SETTINGS_TARGET:
+        return gg.ok(settings_facets())
+    if target == FILTER_TARGET:
+        return gg.ok(filter_facets())
+    return gg.ok({"facets": []})
+
+
+@plugin.on("ui.facets", "sites")
+def _sites(args):
+    """The site switches as a page of their own, opened from the search options' "No site is on"."""
+    page = settings_facets()
+    page["title"] = "Sites"
+    return gg.ok(page)
 
 
 @plugin.on("ui.facets", "set")
